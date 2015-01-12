@@ -1,0 +1,10 @@
+Package: domain-membership-rid
+Version: 0.1-1
+Section: admin
+Architecture: all
+Depends: bash, sed, grep, ping, libpam-krb5, libpam-winbind, libnss-winbind, sudo
+Maintainer: Dmitriy Safronov <zimniy@cyberbrain.pw>
+Description: Active Directory membership configurator
+ Active Directory membership configurator
+ .
+ Initial release :)
