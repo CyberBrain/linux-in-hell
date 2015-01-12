@@ -1,20 +1,6 @@
-#!/bin/bash -e
-
-# Подключение команд debconf
-. /usr/share/debconf/confmodule
-
-case "$1" in
-	configure|reconfigure)
-		# Запрос
-		db_input medium "domain-membership-rid/username" || true # инициализация
-		db_go || true # вывод запроса на экран
-		# Обработка ответа
-		db_get "domain-membership-rid/username" # Получение значения в переменную $RET
-		username="$RET"
-
-		if [[ -z "$username" ]];
-			username="administrator"
-		fi
+#!/bin/bash
+set -e # fail on any error
+set -u # treat unset variables as errors
 
 # ======[ Trap Errors ]======#
 set -E # let shell functions inherit ERR trap
@@ -29,6 +15,13 @@ exit $exit_status
 }
 
 ###########################################################################################
+###########################################################################################
+
+case "$1" in
+configure|reconfigure)
+
+###########################################################################################
+
 # GET CONFIG
 REALM=$(cat /etc/krb5.conf | grep default_realm | cut -s -d '=' -f 2 | sed 's/\ //g')
 WORKGROUP=$(echo $REALM | cut -s -d '.' -f 1)
@@ -127,7 +120,7 @@ FILE=/etc/nsswitch.conf
 ITEMS="passwd group"
 ADDON="winbind"
 for ITEM in $ITEMS; do
-    IN_NSSWITCH="$(cat $FILE | grep ^$ITEM: | grep -v $ADDON)"
+    IN_NSSWITCH="$(cat $FILE | grep ^$ITEM: | grep -v $ADDON)" || true
     if [ -n "${IN_NSSWITCH}" ]; then
 	IN_NSSWITCH_SED="$(echo ${IN_NSSWITCH} | cut -s -d ':' -f 2- | sed 's/^[ ^t]*//;s/[ ^]*$//;s/\ /\\ /g')"
 	sed -e "/^$ITEM/s/$IN_NSSWITCH_SED/$IN_NSSWITCH_SED\ $ADDON/g" -i $FILE
@@ -139,11 +132,21 @@ done
 echo "Using realm $REALM from /etc/krb5.conf"
 echo "---------------------------------------------------------------------"
 echo "Joining domain $REALM now..."
-net ads join -U administrator -D $REALM
+net ads join -U administrator -D $REALM && service winbind restart > /dev/null
 
-	;;
-	*)
-		echo "config called with unknown argument \`$1'" >&2
-		exit 1
-	;;
+###########################################################################################
+
+;;
+*)
+echo "config called with unknown argument \`$1'" >&2
+exit 1
+;;
 esac
+
+###########################################################################################
+###########################################################################################
+
+if [ "$1" == "purge" ] && [ -e /usr/share/debconf/confmodule ] ; then
+. /usr/share/debconf/confmodule
+db_purge
+fi

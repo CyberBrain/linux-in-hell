@@ -1,5 +1,0 @@
-Template: domain-membership-rid/username
-Type: string
-Default: administrator
-Description: Username to join domain with
- Enter username to  join domain with
