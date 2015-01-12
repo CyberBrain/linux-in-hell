@@ -1,6 +1,20 @@
-#!/bin/bash
-set -e # fail on any error
-set -u # treat unset variables as errors
+#!/bin/bash -e
+
+# Подключение команд debconf
+. /usr/share/debconf/confmodule
+
+case "$1" in
+	configure|reconfigure)
+		# Запрос
+		db_input medium "domain-membership-rid/username" || true # инициализация
+		db_go || true # вывод запроса на экран
+		# Обработка ответа
+		db_get "domain-membership-rid/username" # Получение значения в переменную $RET
+		username="$RET"
+
+		if [[ -z "$username" ]];
+			username="administrator"
+		fi
 
 # ======[ Trap Errors ]======#
 set -E # let shell functions inherit ERR trap
@@ -126,3 +140,10 @@ echo "Using realm $REALM from /etc/krb5.conf"
 echo "---------------------------------------------------------------------"
 echo "Joining domain $REALM now..."
 net ads join -U administrator -D $REALM
+
+	;;
+	*)
+		echo "config called with unknown argument \`$1'" >&2
+		exit 1
+	;;
+esac
