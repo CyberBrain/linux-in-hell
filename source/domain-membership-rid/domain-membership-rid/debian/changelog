@@ -1,0 +1,12 @@
+domain-membership-rid (0.1-2) trusty; urgency=low
+
+  * Correct postinstall/postrm scripts
+  * Cleanins /etc/sudoers.d/domain-admins after purge
+
+ -- Dmitriy Safronov <zimniy@cyberbrain.pw>  Mon, 12 Jan 2015 21:48:57 +0000
+
+domain-membership-rid (0.1-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Dmitriy Safronov <zimniy@cyberbrain.pw>  Mon, 12 Jan 2015 20:58:33 +0000
